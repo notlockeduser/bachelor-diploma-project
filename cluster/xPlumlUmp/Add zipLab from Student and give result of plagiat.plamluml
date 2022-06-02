@@ -1,0 +1,49 @@
+@startuml
+
+title Add lab from Student and give result
+autonumber
+
+actor "Student" as student order 0
+participant "Gateway" as gw order 10
+participant "DataService" as dataSvc order 30
+participant "UserService" as userSvc order 20
+participant "PlagiatismService" as plagSvc order 40
+database "FilesDb" as filesDb order 50
+
+activate student
+
+student -> gw: Add lab
+activate gw
+
+gw -> gw: Check file size
+gw -> gw: Check auth
+
+gw -> userSvc: Add lab
+activate userSvc
+
+userSvc -> userSvc: Check role
+
+userSvc -> dataSvc: Add to db
+activate dataSvc
+
+dataSvc -> filesDb: Extract zip file and write
+
+dataSvc -> userSvc: Success
+deactivate dataSvc
+
+userSvc -> plagSvc: Check for plafiatism
+activate plagSvc
+
+plagSvc -> filesDb: Read files
+plagSvc -> plagSvc: Do check
+plagSvc -> userSvc: Return result
+deactivate plagSvc
+
+userSvc -> gw: Return result
+deactivate userSvc
+
+gw -> student: Return result
+deactivate gw
+deactivate student
+
+@enduml

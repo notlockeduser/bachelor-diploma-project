@@ -1,0 +1,22 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://local-mongo-usr:local-mongo-pwd@localhost:27017/user-svc?authSource=admin
+      database: user-svc
+  servlet:
+    multipart:
+      max-request-size: 50MB
+      max-file-size: 50MB
+
+server:
+  port : 8081
+
+#feign.compression.request.enabled=true
+#feign.compression.response.enabled=true
+feign.compression.request.enabled : true
+feign.compression.request.mime-types: text/xml,application/xml,application/json
+feign.compression.request.min-request-size : 2048
+feign:
+  autoconfiguration:
+    jackson:
+      enabled: true
