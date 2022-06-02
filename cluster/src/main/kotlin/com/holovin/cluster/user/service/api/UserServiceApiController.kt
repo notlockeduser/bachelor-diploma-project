@@ -47,8 +47,39 @@ class UserServiceApiController(
         return userService.getLabByTeacher(teacherEmail, subject, labNumber)
     }
 
+    override fun findLabByStudent(
+        studentEmail: String,
+        teacherEmail: String,
+        subject: String,
+        labNumber: String
+    ): LabData {
+        return userService.getLabByStudent(studentEmail, teacherEmail, subject, labNumber)
+    }
+
     override fun findLabsByTeacherEmail(teacherEmail: String): List<LabData> {
         return userService.getLabsByTeacherEmail(teacherEmail)
+    }
+
+    override fun findLabsByStudentEmail(studentEmail: String): List<LabData> {
+        return userService.getLabsByStudentEmail(studentEmail)
+    }
+
+    override fun updateStudentAccessByEmail(
+        teacherEmail: String,
+        studentEmail: String,
+        subject: String,
+        labNumber: String
+    ) {
+        userService.updateStudentAccessByEmail(teacherEmail, studentEmail, subject, labNumber)
+    }
+
+    override fun updateStudentAccessByGroup(
+        teacherEmail: String,
+        group: String,
+        subject: String,
+        labNumber: String
+    ) {
+        userService.updateStudentAccessByEmail(teacherEmail, group, subject, labNumber)
     }
 }
 

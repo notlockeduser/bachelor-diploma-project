@@ -8,6 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 
@@ -47,6 +48,33 @@ interface UserServiceClient {
         @RequestParam labNumber: String
     ): LabData
 
+    @GetMapping("/findLabByStudent")
+    fun findLabByStudent(
+        @RequestParam studentEmail: String,
+        @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    ): LabData
+
     @GetMapping("/findLabsByTeacherEmail")
     fun findLabsByTeacherEmail(@RequestParam teacherEmail: String): List<LabData>
+
+    @GetMapping("/findLabsByStudentEmail")
+    fun findLabsByStudentEmail(@RequestParam studentEmail: String): List<LabData>
+
+    @PostMapping("/updateStudentAccessByEmail")
+    fun updateStudentAccessByEmail(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
+
+    @PostMapping("/updateStudentAccessByGroup")
+    fun updateStudentAccessByGroup(
+        @RequestParam teacherEmail: String,
+        @RequestParam group: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
 }

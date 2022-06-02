@@ -4,6 +4,8 @@ import com.holovin.gw.client.user.service.UserServiceClient
 import com.holovin.gw.domain.dto.LabDescription
 import com.holovin.gw.domain.dto.StudentData
 import com.holovin.gw.domain.dto.TeacherData
+import com.holovin.gw.domain.dto.UpdateAccessByEmail
+import com.holovin.gw.domain.dto.UpdateAccessByGroup
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Controller
@@ -60,6 +62,7 @@ class GwController(
 
         if (userServiceClient.existsStudentFromDbByEmail(principal.name)) {
             model.addAttribute("student", userServiceClient.getStudentFromDbByEmail(principal.name))
+            model.addAttribute("labs", userServiceClient.findLabsByStudentEmail(principal.name))
             return "profile_student"
         }
         if (userServiceClient.existsTeacherFromDbByEmail(principal.name)) {
@@ -93,8 +96,62 @@ class GwController(
         @PathVariable("labNumber") labNumber: String,
         model: Model
     ): String {
-        model.addAttribute("lab", userServiceClient.findLabByTeacher(email, subject, labNumber))
+        val lab = userServiceClient.findLabByTeacher(email, subject, labNumber)
+        model.addAttribute("lab", lab)
+        model.addAttribute("updateAccessByEmail", UpdateAccessByEmail())
+        model.addAttribute("updateAccessByGroup", UpdateAccessByGroup())
         return "get_lab_by_teacher"
+    }
+
+    @GetMapping("/get_lab_by_student/{email}/{subject}/{labNumber}")
+    fun getLabByStudent(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        model: Model
+    ): String {
+        model.addAttribute(
+            "lab",
+            userServiceClient.findLabByStudent(principal.name, teacherEmail, subject, labNumber)
+        )
+        return "get_lab_by_student"
+    }
+
+    @GetMapping("/update_access_by_email/{email}/{subject}/{labNumber}")
+    fun updateAccessByEmailStudent(
+        principal: Principal,
+        @PathVariable("email") email: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        @ModelAttribute updateAccessByEmail: UpdateAccessByEmail, model: Model
+    ): String {
+        userServiceClient.updateStudentAccessByEmail(
+            principal.name,
+            updateAccessByEmail.email!!,
+            subject,
+            labNumber
+        )
+
+        return "forward:/get_lab_by_teacher/${principal.name}/${subject}/${labNumber}"
+    }
+
+    @GetMapping("/update_access_by_group/{email}/{subject}/{labNumber}")
+    fun updateAccessByGroupStudent(
+        principal: Principal,
+        @PathVariable("email") email: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        @ModelAttribute updateAccessByGroup: UpdateAccessByGroup, model: Model
+    ): String {
+        userServiceClient.updateStudentAccessByGroup(
+            principal.name,
+            updateAccessByGroup.group!!,
+            subject,
+            labNumber
+        )
+
+        return "forward:/get_lab_by_teacher/${principal.name}/${subject}/${labNumber}"
     }
 
 ////

@@ -16,26 +16,34 @@
 </head>
 <body>
 <div>
-    <h1>Teacher profile</h1>
+    <h1>Lab statistic</h1>
 
     <hr>
     <p th:text="${lab}"></p>
     <hr>
-    <!--    <div th:object="${lab}">-->
 
-    <!--        <p th:text="*{name}"></p>-->
-    <!--        <p th:text="*{surname}"></p>-->
-    <!--        <p th:text="*{email}"></p>-->
-    <!--        <tr th:each="labFolder: *{createdLabs}">-->
-    <!--            <a th:text="${labFolder.createNameFolder()}"-->
-    <!--               th:href="@{/get_lab_by_teacher/{email}/{subject}/{labNumber}(email = ${labFolder.getIdTeacher()},subject = ${labFolder.getSubject()},labNumber = ${labFolder.getLabNumber()})}">-->
-    <!--            </a>-->
-    <!--        </tr>-->
+    <hr>
+    <h2>Add access by email student</h2>
+    <form th:object="${updateAccessByEmail}" th:action="@{/update_access_by_email/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}" th:method="get">
+        <div>
+            <label for="studentEmail">Given studentEmail</label>
+            <input id="studentEmail" type="text" th:field="*{email}">
+        </div>
+        <button type="submit">Add access by email student</button>
+    </form>
+    <hr>
 
-    <!--        <hr>-->
-    <!--        <a th:href="@{create_lab}">Add lab</a>-->
+    <hr>
+    <h2>Add access by group</h2>
+    <form th:object="${updateAccessByGroup}" th:action="@{/update_access_by_group/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}" th:method="get">
+        <div>
+            <label for="group">Given group</label>
+            <input id="group" type="text" th:field="*{group}">
+        </div>
+        <button type="submit">Add access by group</button>
+    </form>
+    <hr>
 
-    <!--    </div>-->
 </div>
 </body>
 </html>

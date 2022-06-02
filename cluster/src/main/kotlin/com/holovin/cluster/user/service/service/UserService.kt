@@ -3,18 +3,14 @@ package com.holovin.cluster.user.service.service
 import com.holovin.cluster.data.service.DataService
 import com.holovin.cluster.plagiarism.service.PlagiarismService
 import com.holovin.cluster.test.service.TestService
-import com.holovin.cluster.user.service.domain.LabStudent
 import com.holovin.cluster.user.service.api.dto.LabDescription
-import com.holovin.cluster.user.service.domain.LabFolder
 import com.holovin.cluster.user.service.domain.mongo.LabData
 import com.holovin.cluster.user.service.domain.mongo.StudentData
 import com.holovin.cluster.user.service.domain.mongo.TeacherData
 import com.holovin.cluster.user.service.mongo.LabDataRepository
 import com.holovin.cluster.user.service.mongo.StudentDataRepository
 import com.holovin.cluster.user.service.mongo.TeacherDataRepository
-import net.lingala.zip4j.ZipFile
 import org.springframework.stereotype.Component
-import org.springframework.web.multipart.MultipartFile
 
 @Component
 class UserService(
@@ -32,9 +28,9 @@ class UserService(
         return studentDataRepository.save(studentData)
     }
 
-    fun updateStudent(studentData: StudentData): StudentData {
-        return studentDataRepository.save(studentData)
-    }
+//    fun updateStudent(studentData: StudentData): StudentData {
+//        return studentDataRepository.save(studentData)
+//    }
 
 //    fun addLab(studentId: String, labData: LabStudent, archiveLab: MultipartFile) {
 //
@@ -98,19 +94,15 @@ class UserService(
 //        }
 //    }
 //
-//    fun getListOfAccessFolders(studentId: String): List<LabFolder> {
-//        return getStudentFromDb(studentId).acceptedFolders.toList()
-//    }
-//
 
     // Teacher
     fun addTeacher(teacherData: TeacherData): TeacherData {
         return teacherDataRepository.save(teacherData)
     }
 
-    fun updateTeacher(teacherData: TeacherData) {
-        teacherDataRepository.save(teacherData)
-    }
+//    fun updateTeacher(teacherData: TeacherData) {
+//        teacherDataRepository.save(teacherData)
+//    }
 
 //    fun checkPlagLabByTeacher(teacherId: String, labFolder: LabFolder): String {
 //
@@ -147,33 +139,53 @@ class UserService(
         return labDataRepository.findByTeacherEmailAndSubjectAndLabNumber(teacherEmail, subject, labNumber).get()
     }
 
+    fun getLabByStudent(studentEmail: String, teacherEmail: String, subject: String, labNumber: String): LabData {
 
-//    fun updateStudentAccessByEmail(teacherId: String, studentEmail: String, labFolder: LabFolder) {
-//
-//        val teacherData = getTeacherFromDb(teacherId)
-//        val studentData = getStudentFromDbByEmail(studentEmail)
-//
-//        // add access (update field acceptedFolders)
-//        studentData.acceptedFolders.add(labFolder)
-//        studentDataRepository.save(studentData)
-//    }
-//
-//    fun updateStudentsAccessByGroup(teacherId: String, group: String, labFolder: LabFolder) {
-//
-//        val teacherData = getTeacherFromDb(teacherId)
-//
-//        // add access (update field acceptedFolders)
-//        val studentInGroup = studentDataRepository.findAllByGroup(group)
-//        studentInGroup.map { it.acceptedFolders.add(labFolder) }
-//        studentDataRepository.saveAll(studentInGroup)
-//    }
-
-    fun addLabsByTeacher(teacherId: String, labFolder: LabFolder, archiveLab: ZipFile) {
-
-        val teacherData = getTeacherFromDb(teacherId)
-
-        dataService.saveLabs(archiveLab, labFolder.createNameFolder())
+        getStudentFromDbByEmail(studentEmail)
+        getTeacherFromDbByEmail(teacherEmail)
+        return labDataRepository.findByAcceptedStudentEmailsContainsAndTeacherEmailAndSubjectAndLabNumber(
+            studentEmail,
+            teacherEmail,
+            subject,
+            labNumber
+        ).get()
     }
+
+    fun getLabsByStudentEmail(studentEmail: String): List<LabData> {
+
+        getStudentFromDbByEmail(studentEmail)
+        return labDataRepository.findAllByAcceptedStudentEmailsContains(studentEmail)
+    }
+
+    fun updateStudentAccessByEmail(teacherEmail: String, studentEmail: String, subject: String, labNumber: String) {
+
+        val teacherData = getTeacherFromDbByEmail(teacherEmail)
+        val studentData = getStudentFromDbByEmail(studentEmail)
+
+        val labData = labDataRepository.findByTeacherEmailAndSubjectAndLabNumber(teacherEmail, subject, labNumber).get()
+        labData.acceptedStudentEmails.add(studentEmail)
+
+        labDataRepository.save(labData)
+    }
+
+    fun updateStudentsAccessByGroup(teacherEmail: String, group: String, subject: String, labNumber: String) {
+
+        val teacherData = getTeacherFromDbByEmail(teacherEmail)
+
+        val labData = labDataRepository.findByTeacherEmailAndSubjectAndLabNumber(teacherEmail, subject, labNumber).get()
+
+        val studentsInGroup = studentDataRepository.findAllByGroup(group)
+        studentsInGroup.map { labData.acceptedStudentEmails.add(it.email) }
+
+        labDataRepository.save(labData)
+    }
+
+//    fun addLabsByTeacher(teacherId: String, labFolder: LabFolder, archiveLab: ZipFile) {
+//
+//        val teacherData = getTeacherFromDb(teacherId)
+//
+//        dataService.saveLabs(archiveLab, labFolder.createNameFolder())
+//    }
 //
 //    fun addTemplateByTeacher(teacherId: String, labFolder: LabFolder, archiveLab: ZipFile) {
 //        val teacherData = getTeacherFromDb(teacherId)
@@ -182,18 +194,6 @@ class UserService(
 //    }
 
     // utils
-    private fun getStudentFromDb(studentId: String): StudentData {
-        val studentDataOptional = studentDataRepository.findById(studentId)
-        require(studentDataOptional.isPresent) { "No such STUDENT with id = $studentId" }
-        return studentDataOptional.get()
-    }
-
-    private fun getTeacherFromDb(teacherId: String): TeacherData {
-        val teacherDataOptional = teacherDataRepository.findById(teacherId)
-        require(teacherDataOptional.isPresent) { "No such TEACHER with id = $teacherId" }
-        return teacherDataOptional.get()
-    }
-
     fun existsStudentFromDbByEmail(studentEmail: String): Boolean {
         return studentDataRepository.findByEmail(studentEmail).isPresent
     }
