@@ -3,6 +3,7 @@ package com.holovin.cluster.user.service.service
 import com.holovin.cluster.data.service.DataService
 import com.holovin.cluster.plagiarism.service.PlagiarismService
 import com.holovin.cluster.test.service.TestService
+import com.holovin.cluster.user.service.api.dto.LabDataForStudent
 import com.holovin.cluster.user.service.api.dto.LabDescription
 import com.holovin.cluster.user.service.domain.mongo.LabData
 import com.holovin.cluster.user.service.domain.mongo.StudentData
@@ -11,6 +12,7 @@ import com.holovin.cluster.user.service.mongo.LabDataRepository
 import com.holovin.cluster.user.service.mongo.StudentDataRepository
 import com.holovin.cluster.user.service.mongo.TeacherDataRepository
 import org.springframework.stereotype.Component
+import org.springframework.web.multipart.MultipartFile
 
 @Component
 class UserService(
@@ -32,20 +34,21 @@ class UserService(
 //        return studentDataRepository.save(studentData)
 //    }
 
-//    fun addLab(studentId: String, labData: LabStudent, archiveLab: MultipartFile) {
-//
-//        val studentData = getStudentFromDb(studentId)
-//
-//        // Check if student has access to folder
-//        val labFolder = labData.createLabFolder()
-//        require(studentData.acceptedFolders.any { it == labFolder }) {
-//            "you does not have access to folder, accepted folder = ${studentData.acceptedFolders} " +
-//                    "require folder = $labFolder"
-//        }
-//
-//        // data service
-//        dataService.saveLab(archiveLab, labData.createNameLabFolder(), labData.createNameLab())
-//    }
+    fun addLab(teacherEmail: String, studentEmail: String, subject: String, labNumber: String, multipartFile: MultipartFile) {
+
+        val studentData = getStudentFromDbByEmail(studentEmail)
+        val teacherData = getTeacherFromDbByEmail(teacherEmail)
+
+        val labData = labDataRepository.findByAcceptedStudentEmailsContainsAndTeacherEmailAndSubjectAndLabNumber(
+            studentEmail,
+            teacherEmail,
+            subject,
+            labNumber
+        ).get()
+
+        // data service
+        dataService.saveLab(multipartFile, labData.createNameLabFolder(), labData.createNameLab(studentData))
+    }
 //
 //    fun downloadTemplateLab(studentId: String, labData: LabStudent): ZipFile {
 //
@@ -70,17 +73,20 @@ class UserService(
 //        val result = plagiarismService.checkLabByStudent(labData.createNameLabFolder(), labData.createNameLab())
 //        return result.toString()
 //    }
-//    fun checkCompileLabByStudent(studentId: String, labData: LabStudent): Result<String> {
-//
-//        getStudentFromDb(studentId)
-//
-//        return try {
-//            testService.compileSrc(labData.createNameLabFolder(), labData.createNameLab())
-//            Result.success("ok")
-//        } catch (ex: Exception) {
-//            Result.failure(ex)
-//        }
-//    }
+
+    fun compileLabByStudent(teacherEmail: String, studentEmail: String, subject: String, labNumber: String) {
+
+        val studentFromDbByEmail = getStudentFromDbByEmail(studentEmail)
+
+        val labData = labDataRepository.findByAcceptedStudentEmailsContainsAndTeacherEmailAndSubjectAndLabNumber(
+            studentEmail,
+            teacherEmail,
+            subject,
+            labNumber
+        ).get()
+
+        testService.compileSrc(labData.createNameLabFolder(), labData.createNameLab(studentFromDbByEmail))
+    }
 //
 //    fun checkTestsLabByStudent(studentId: String, labData: LabStudent): Result<String> {
 //
@@ -139,16 +145,27 @@ class UserService(
         return labDataRepository.findByTeacherEmailAndSubjectAndLabNumber(teacherEmail, subject, labNumber).get()
     }
 
-    fun getLabByStudent(studentEmail: String, teacherEmail: String, subject: String, labNumber: String): LabData {
+    fun getLabByStudent(
+        studentEmail: String,
+        teacherEmail: String,
+        subject: String,
+        labNumber: String
+    ): LabDataForStudent {
 
-        getStudentFromDbByEmail(studentEmail)
+        val studentFromDbByEmail = getStudentFromDbByEmail(studentEmail)
         getTeacherFromDbByEmail(teacherEmail)
-        return labDataRepository.findByAcceptedStudentEmailsContainsAndTeacherEmailAndSubjectAndLabNumber(
+
+        val labData = labDataRepository.findByAcceptedStudentEmailsContainsAndTeacherEmailAndSubjectAndLabNumber(
             studentEmail,
             teacherEmail,
             subject,
             labNumber
         ).get()
+
+        val resultCompile =
+            testService.getResultCompile(labData.createNameLabFolder(), labData.createNameLab(studentFromDbByEmail))
+
+        return LabDataForStudent(teacherEmail, subject, labNumber, labData.description, resultCompile)
     }
 
     fun getLabsByStudentEmail(studentEmail: String): List<LabData> {

@@ -15,9 +15,9 @@ data class LabData(
     val acceptedStudentEmails: MutableSet<String> = mutableSetOf()
 ) {
 
-//    fun createNameLab(): String {
-//        return teacherEmail + "_" + subject + "_" + labNumber + "_" + group + "_" + surname + "_" + name
-//    }
+    fun createNameLab(studentFromDbByEmail: StudentData): String {
+        return teacherEmail + "_" + subject + "_" + labNumber + "_" + studentFromDbByEmail.group + "_" + studentFromDbByEmail.email
+    }
 
     fun createLabFolder(): LabFolder {
         return LabFolder(teacherEmail, subject, labNumber)

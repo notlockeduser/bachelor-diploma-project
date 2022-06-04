@@ -17,14 +17,15 @@
 <body>
 <div>
     <h1>Student profile</h1>
-    <div th:object="${student}">
+    <p th:text="${student}"></p>
+<!--    <div th:object="${student}">-->
 
-        <p th:text="*{name}"></p>
-        <p th:text="*{surname}"></p>
-        <p th:text="*{email}"></p>
-        <p th:text="*{group}"></p>
+<!--        <p th:text="*{name}"></p>-->
+<!--        <p th:text="*{surname}"></p>-->
+<!--        <p th:text="*{email}"></p>-->
+<!--        <p th:text="*{group}"></p>-->
 
-    </div>
+<!--    </div>-->
     <hr>
     <tr th:each="lab: *{labs}">
         <a th:text="${lab}"

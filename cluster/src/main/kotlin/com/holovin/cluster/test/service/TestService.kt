@@ -1,5 +1,7 @@
 package com.holovin.cluster.test.service
 
+import com.holovin.cluster.test.service.domain.CompileData
+import com.holovin.cluster.test.service.domain.CompileDataRepository
 import org.apache.maven.plugin.surefire.log.api.NullConsoleLogger
 import org.apache.maven.plugins.surefire.report.SurefireReportParser
 import org.springframework.stereotype.Component
@@ -11,7 +13,9 @@ import java.util.Locale
 
 
 @Component
-class TestService {
+class TestService(
+    val compileDataRepository: CompileDataRepository
+) {
 
     fun compileSrc(labFolder: String, labName: String) {
         val labPath = filesDb + "\\" + labFolder + "\\" + labName
@@ -23,7 +27,15 @@ class TestService {
         Runtime.getRuntime().exec(cmd).waitFor()
         Thread.sleep(10000)
 
-        checkIfCompileSuccess(labPath)
+        checkIfCompileSuccess(labFolder, labName, labPath)
+    }
+
+    fun getResultCompile(labFolder: String, labName: String): Boolean {
+        val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
+        return when {
+            compileDataOptional.isPresent -> compileDataOptional.get().compileResult
+            else -> false
+        }
     }
 
     fun runTests(labFolder: String, labName: String) {
@@ -46,20 +58,45 @@ class TestService {
         }
     }
 
-    private fun checkIfCompileSuccess(labPath: String) {
-        val reportCompilePath = "$labPath\\target\\maven-status\\maven-compiler-plugin\\compile\\default-compile"
-        val createdFiles = "$reportCompilePath\\createdFiles.lst"
-        val inputFiles = "$reportCompilePath\\inputFiles.lst"
+    private fun checkIfCompileSuccess(labFolder: String, labName: String, labPath: String) {
+        try {
+            val reportCompilePath = "$labPath\\target\\maven-status\\maven-compiler-plugin\\compile\\default-compile"
+            val createdFiles = "$reportCompilePath\\createdFiles.lst"
+            val inputFiles = "$reportCompilePath\\inputFiles.lst"
 
-        var lineNumberCreated = 0
-        val lineNumberCreatedReader = LineNumberReader(BufferedReader(FileReader(createdFiles)))
-        if (lineNumberCreatedReader.readLine() != null) lineNumberCreated = lineNumberCreatedReader.lineNumber
+            var lineNumberCreated = 0
+            val lineNumberCreatedReader = LineNumberReader(BufferedReader(FileReader(createdFiles)))
+            if (lineNumberCreatedReader.readLine() != null) lineNumberCreated = lineNumberCreatedReader.lineNumber
 
-        var lineNumberInput = 0
-        val lineNumberInputReader = LineNumberReader(BufferedReader(FileReader(inputFiles)))
-        if (lineNumberInputReader.readLine() != null) lineNumberInput = lineNumberInputReader.lineNumber
+            var lineNumberInput = 0
+            val lineNumberInputReader = LineNumberReader(BufferedReader(FileReader(inputFiles)))
+            if (lineNumberInputReader.readLine() != null) lineNumberInput = lineNumberInputReader.lineNumber
 
-        require(lineNumberCreated == lineNumberInput) { "Compile error" }
+            val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
+
+            if (compileDataOptional.isPresent){
+                val compileData = compileDataOptional.get()
+                compileData.compileResult = true
+                compileDataRepository.save(compileData)
+            } else {
+                compileDataRepository.save(CompileData(labFolder = labFolder, labName = labName, compileResult = true))
+            }
+
+            require(lineNumberCreated == lineNumberInput) { "Compile error" }
+
+
+        } catch (e: Exception) {
+            val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
+
+            if (compileDataOptional.isPresent){
+                val compileData = compileDataOptional.get()
+                compileData.compileResult = false
+                compileDataRepository.save(compileData)
+            } else {
+                compileDataRepository.save(CompileData(labFolder = labFolder, labName = labName, compileResult = false))
+            }
+
+        }
     }
 
     companion object {

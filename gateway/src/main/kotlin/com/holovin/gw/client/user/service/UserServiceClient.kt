@@ -1,6 +1,7 @@
 package com.holovin.gw.client.user.service
 
 import com.holovin.gw.domain.dto.LabData
+import com.holovin.gw.domain.dto.LabDataForStudent
 import com.holovin.gw.domain.dto.LabDescription
 import com.holovin.gw.domain.dto.StudentData
 import com.holovin.gw.domain.dto.TeacherData
@@ -8,9 +9,10 @@ import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.multipart.MultipartFile
 
 @FeignClient("userClient", url = "localhost:8080")
 interface UserServiceClient {
@@ -54,7 +56,7 @@ interface UserServiceClient {
         @RequestParam teacherEmail: String,
         @RequestParam subject: String,
         @RequestParam labNumber: String
-    ): LabData
+    ): LabDataForStudent
 
     @GetMapping("/findLabsByTeacherEmail")
     fun findLabsByTeacherEmail(@RequestParam teacherEmail: String): List<LabData>
@@ -76,5 +78,22 @@ interface UserServiceClient {
         @RequestParam group: String,
         @RequestParam subject: String,
         @RequestParam labNumber: String
+    )
+
+    @GetMapping("/compileLabByStudent")
+    fun compileLabByStudent(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
+
+    @PostMapping("/addLabByStudent", consumes = ["multipart/form-data"])
+    fun addLabByStudent(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String,
+        @RequestPart multipartFile: MultipartFile
     )
 }

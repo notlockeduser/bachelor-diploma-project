@@ -12,6 +12,7 @@ class DataService {
     fun saveLab(archiveLab: MultipartFile, labFolder: String, labName: String) {
         // save file as .zip
         val file = File(zip_files + "\\zip_${RandomStringUtils.randomAlphabetic(10)}.zip")
+        file.createNewFile()
         archiveLab.transferTo(file)
 
         // extract zip file
@@ -31,8 +32,9 @@ class DataService {
     }
 
     companion object {
+        private const val absolute = "C:\\Users\\Bogdan\\Desktop\\Diploma\\cluster\\"
         const val rootFolder = "xFiles\\database_lab_files"
-        const val zip_files = "xFiles\\database_zip_files"
+        const val zip_files = absolute + "xFiles\\database_zip_files"
         const val toUpload = "xFiles\\database_to_upload"
     }
 }

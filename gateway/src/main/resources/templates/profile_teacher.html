@@ -17,13 +17,14 @@
 <body>
 <div>
     <h1>Teacher profile</h1>
-    <div th:object="${teacher}">
+    <p th:text="${teacher}"></p>
+<!--    <div th:object="${teacher}">-->
 
-        <p th:text="*{name}"></p>
-        <p th:text="*{surname}"></p>
-        <p th:text="*{email}"></p>
+<!--        <p th:text="*{name}"></p>-->
+<!--        <p th:text="*{surname}"></p>-->
+<!--        <p th:text="*{email}"></p>-->
 
-    </div>
+<!--    </div>-->
     <hr>
     <tr th:each="lab: *{labs}">
         <a th:text="${lab}"

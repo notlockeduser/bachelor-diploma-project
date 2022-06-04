@@ -1,5 +1,6 @@
 package com.holovin.cluster.user.service.api
 
+import com.holovin.cluster.user.service.api.dto.LabDataForStudent
 import com.holovin.cluster.user.service.api.dto.LabDescription
 import com.holovin.cluster.user.service.domain.mongo.LabData
 import com.holovin.cluster.user.service.service.UserService
@@ -8,6 +9,7 @@ import com.holovin.cluster.user.service.domain.mongo.TeacherData
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 class UserServiceApiController(
@@ -52,7 +54,7 @@ class UserServiceApiController(
         teacherEmail: String,
         subject: String,
         labNumber: String
-    ): LabData {
+    ): LabDataForStudent {
         return userService.getLabByStudent(studentEmail, teacherEmail, subject, labNumber)
     }
 
@@ -80,6 +82,20 @@ class UserServiceApiController(
         labNumber: String
     ) {
         userService.updateStudentAccessByEmail(teacherEmail, group, subject, labNumber)
+    }
+
+    override fun compileLabByStudent(teacherEmail: String, studentEmail: String, subject: String, labNumber: String) {
+        userService.compileLabByStudent(teacherEmail, studentEmail, subject, labNumber)
+    }
+
+    override fun addLabByStudent(
+        teacherEmail: String,
+        studentEmail: String,
+        subject: String,
+        labNumber: String,
+        multipartFile: MultipartFile
+    ) {
+        userService.addLab(teacherEmail, studentEmail, subject, labNumber, multipartFile)
     }
 }
 

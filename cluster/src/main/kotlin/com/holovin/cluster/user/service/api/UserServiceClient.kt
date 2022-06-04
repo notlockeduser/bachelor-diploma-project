@@ -1,5 +1,6 @@
 package com.holovin.cluster.user.service.api
 
+import com.holovin.cluster.user.service.api.dto.LabDataForStudent
 import com.holovin.cluster.user.service.api.dto.LabDescription
 import com.holovin.cluster.user.service.domain.mongo.LabData
 import com.holovin.cluster.user.service.domain.mongo.StudentData
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.multipart.MultipartFile
 
 interface UserServiceClient {
 
@@ -52,7 +55,7 @@ interface UserServiceClient {
         @RequestParam teacherEmail: String,
         @RequestParam subject: String,
         @RequestParam labNumber: String
-    ): LabData
+    ): LabDataForStudent
 
     @GetMapping("/findLabsByTeacherEmail")
     fun findLabsByTeacherEmail(@RequestParam teacherEmail: String): List<LabData>
@@ -74,5 +77,22 @@ interface UserServiceClient {
         @RequestParam group: String,
         @RequestParam subject: String,
         @RequestParam labNumber: String
+    )
+
+    @GetMapping("/compileLabByStudent")
+    fun compileLabByStudent(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
+
+    @PostMapping("/addLabByStudent", consumes = ["multipart/form-data"])
+    fun addLabByStudent(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String,
+        @RequestPart multipartFile: MultipartFile
     )
 }

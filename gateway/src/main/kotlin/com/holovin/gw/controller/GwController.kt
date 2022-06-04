@@ -6,6 +6,7 @@ import com.holovin.gw.domain.dto.StudentData
 import com.holovin.gw.domain.dto.TeacherData
 import com.holovin.gw.domain.dto.UpdateAccessByEmail
 import com.holovin.gw.domain.dto.UpdateAccessByGroup
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Controller
@@ -15,6 +16,10 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.view.RedirectView
 import java.security.Principal
 
 @Controller
@@ -115,7 +120,35 @@ class GwController(
             "lab",
             userServiceClient.findLabByStudent(principal.name, teacherEmail, subject, labNumber)
         )
+
         return "get_lab_by_student"
+    }
+
+    @GetMapping("/compile_lab_by_student/{email}/{subject}/{labNumber}")
+    fun compileLabByStudent(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        model: Model
+    ): String {
+        userServiceClient.compileLabByStudent(teacherEmail, principal.name, subject, labNumber)
+
+        return "forward:/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}"
+    }
+
+    @ResponseBody
+    @PostMapping("/upload_lab_by_student/{email}/{subject}/{labNumber}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadLabByStudent(
+        principal: Principal,
+        @RequestParam file: MultipartFile,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+    ):  RedirectView {
+        userServiceClient.addLabByStudent(teacherEmail, principal.name, subject, labNumber, file)
+        return RedirectView("/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}")
+
     }
 
     @GetMapping("/update_access_by_email/{email}/{subject}/{labNumber}")

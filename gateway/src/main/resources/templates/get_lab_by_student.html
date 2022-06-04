@@ -20,7 +20,22 @@
 
     <hr>
     <p th:text="${lab}"></p>
+
     <hr>
+
+<!--    <p th:text="Result compile ${lab.getCompileResult()}"></p>-->
+    <a th:href="@{/compile_lab_by_student/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
+        Start compile
+    </a>
+
+    <hr>
+
+    <form method="post" th:action="@{/upload_lab_by_student/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}" enctype="multipart/form-data">
+        <div class="form-group">
+            <input type="file" name="file" class="form-control-file">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload Zip File</button>
+    </form>
     <!--    <div th:object="${lab}">-->
 
     <!--        <p th:text="*{name}"></p>-->
