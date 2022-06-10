@@ -2,6 +2,7 @@ package com.holovin.cluster.user.service.api
 
 import com.holovin.cluster.user.service.api.dto.LabDataForStudent
 import com.holovin.cluster.user.service.api.dto.LabDescription
+import com.holovin.cluster.user.service.api.dto.LabsDataForTeacher
 import com.holovin.cluster.user.service.domain.mongo.LabData
 import com.holovin.cluster.user.service.service.UserService
 import com.holovin.cluster.user.service.domain.mongo.StudentData
@@ -45,8 +46,8 @@ class UserServiceApiController(
         return ResponseEntity.ok(Unit)
     }
 
-    override fun findLabByTeacher(teacherEmail: String, subject: String, labNumber: String): LabData {
-        return userService.getLabByTeacher(teacherEmail, subject, labNumber)
+    override fun findLabByTeacher(teacherEmail: String, subject: String, labNumber: String): LabsDataForTeacher {
+        return userService.getLabInfoByTeacher(teacherEmail, subject, labNumber)
     }
 
     override fun findLabByStudent(
@@ -55,7 +56,7 @@ class UserServiceApiController(
         subject: String,
         labNumber: String
     ): LabDataForStudent {
-        return userService.getLabByStudent(studentEmail, teacherEmail, subject, labNumber)
+        return userService.getLabInfoByStudent(studentEmail, teacherEmail, subject, labNumber)
     }
 
     override fun findLabsByTeacherEmail(teacherEmail: String): List<LabData> {
@@ -75,6 +76,16 @@ class UserServiceApiController(
         userService.updateStudentAccessByEmail(teacherEmail, studentEmail, subject, labNumber)
     }
 
+    override fun uploadLabByGithub(
+        teacherEmail: String,
+        studentEmail: String,
+        subject: String,
+        labNumber: String,
+        ownerRepos: String
+    ) {
+        userService.uploadLabByGithub(teacherEmail, studentEmail, subject, labNumber, ownerRepos)
+    }
+
     override fun updateStudentAccessByGroup(
         teacherEmail: String,
         group: String,
@@ -84,8 +95,16 @@ class UserServiceApiController(
         userService.updateStudentAccessByEmail(teacherEmail, group, subject, labNumber)
     }
 
+    override fun checkPlagByStudent(teacherEmail: String, studentEmail: String, subject: String, labNumber: String) {
+        userService.checkPlagByStudent(teacherEmail, studentEmail, subject, labNumber)
+    }
+
     override fun compileLabByStudent(teacherEmail: String, studentEmail: String, subject: String, labNumber: String) {
         userService.compileLabByStudent(teacherEmail, studentEmail, subject, labNumber)
+    }
+
+    override fun testLabByStudent(teacherEmail: String, studentEmail: String, subject: String, labNumber: String) {
+        userService.testLabByStudent(teacherEmail, studentEmail, subject, labNumber)
     }
 
     override fun addLabByStudent(
@@ -96,6 +115,18 @@ class UserServiceApiController(
         multipartFile: MultipartFile
     ) {
         userService.addLab(teacherEmail, studentEmail, subject, labNumber, multipartFile)
+    }
+
+    override fun checkPlagByTeacher(teacherEmail: String, subject: String, labNumber: String) {
+        userService.checkPlagByTeacher(teacherEmail, subject, labNumber)
+    }
+
+    override fun compileLabByTeacher(teacherEmail: String, subject: String, labNumber: String) {
+        userService.compileLabByTeacher(teacherEmail, subject, labNumber)
+    }
+
+    override fun testLabByTeacher(teacherEmail: String, subject: String, labNumber: String) {
+        userService.testLabByTeacher(teacherEmail, subject, labNumber)
     }
 }
 

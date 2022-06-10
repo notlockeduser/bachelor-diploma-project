@@ -1,6 +1,7 @@
 package com.holovin.gw.controller
 
 import com.holovin.gw.client.user.service.UserServiceClient
+import com.holovin.gw.domain.dto.GitHubUrl
 import com.holovin.gw.domain.dto.LabDescription
 import com.holovin.gw.domain.dto.StudentData
 import com.holovin.gw.domain.dto.TeacherData
@@ -101,8 +102,8 @@ class GwController(
         @PathVariable("labNumber") labNumber: String,
         model: Model
     ): String {
-        val lab = userServiceClient.findLabByTeacher(email, subject, labNumber)
-        model.addAttribute("lab", lab)
+        val labInfo = userServiceClient.findLabByTeacher(email, subject, labNumber)
+        model.addAttribute("lab", labInfo)
         model.addAttribute("updateAccessByEmail", UpdateAccessByEmail())
         model.addAttribute("updateAccessByGroup", UpdateAccessByGroup())
         return "get_lab_by_teacher"
@@ -120,8 +121,22 @@ class GwController(
             "lab",
             userServiceClient.findLabByStudent(principal.name, teacherEmail, subject, labNumber)
         )
+        model.addAttribute("gitHubUrl", GitHubUrl())
 
         return "get_lab_by_student"
+    }
+
+    @GetMapping("/check_plag_lab_by_student/{email}/{subject}/{labNumber}")
+    fun checkPlagLabByStudent(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        model: Model
+    ): String {
+        userServiceClient.checkPlagByStudent(teacherEmail, principal.name, subject, labNumber)
+
+        return "redirect:/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}"
     }
 
     @GetMapping("/compile_lab_by_student/{email}/{subject}/{labNumber}")
@@ -134,22 +149,57 @@ class GwController(
     ): String {
         userServiceClient.compileLabByStudent(teacherEmail, principal.name, subject, labNumber)
 
-        return "forward:/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}"
+        return "redirect:/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}"
+    }
+
+    @GetMapping("/test_lab_by_student/{email}/{subject}/{labNumber}")
+    fun testLabByStudent(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        model: Model
+    ): String {
+        userServiceClient.testLabByStudent(teacherEmail, principal.name, subject, labNumber)
+
+        return "redirect:/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}"
     }
 
     @ResponseBody
-    @PostMapping("/upload_lab_by_student/{email}/{subject}/{labNumber}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping(
+        "/upload_lab_by_student/{email}/{subject}/{labNumber}",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
     fun uploadLabByStudent(
         principal: Principal,
         @RequestParam file: MultipartFile,
         @PathVariable("email") teacherEmail: String,
         @PathVariable("subject") subject: String,
         @PathVariable("labNumber") labNumber: String,
-    ):  RedirectView {
+    ): RedirectView {
         userServiceClient.addLabByStudent(teacherEmail, principal.name, subject, labNumber, file)
         return RedirectView("/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}")
-
     }
+
+    @GetMapping("/upload_lab_by_github/{email}/{subject}/{labNumber}")
+    fun uploadLabByGithub(
+        principal: Principal,
+        @PathVariable("email") email: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        @ModelAttribute updateAccessByEmail: GitHubUrl, model: Model
+    ): RedirectView {
+        userServiceClient.uploadLabByGithub(
+            email,
+            principal.name,
+            subject,
+            labNumber,
+            updateAccessByEmail.ownerRepos!!
+        )
+
+        return RedirectView("/get_lab_by_student/${email}/${subject}/${labNumber}")
+    }
+
 
     @GetMapping("/update_access_by_email/{email}/{subject}/{labNumber}")
     fun updateAccessByEmailStudent(
@@ -187,35 +237,42 @@ class GwController(
         return "forward:/get_lab_by_teacher/${principal.name}/${subject}/${labNumber}"
     }
 
-////
-////    @PostMapping("/add_teacher")
-////    fun addTeacher(
-////        @RequestParam name: String,
-////        @RequestParam surname: String,
-////        @RequestParam password: String,
-////        @RequestParam email: String
-////    ): ResponseEntity<String> {
-////        val teacherData = TeacherData(name, surname, password, email)
-////        val addTeacherResponse = userService.addTeacher(teacherData)
-////        return ResponseEntity.ok("Teacher add = $addTeacherResponse")
-////    }
-//
-//    @PostMapping("/upload_by_student")
-//    fun uploadZipLabByStudent(
-//        @RequestParam file: MultipartFile,
-//        @RequestParam studentId: String,
-//        @RequestParam labData: LabData
-//    ): ResponseEntity<String> {
-//        try {
-//            if (file.contentType != "application/zip") return ResponseEntity.badRequest()
-//                .body("Type of upload files need = application/zip, current = " + file.contentType)
-//
-//            userService.addLab(studentId, labData, file)
-//
-//
-//            return ResponseEntity.ok("Upload file successfully: " + file.originalFilename)
-//        } catch (e: Exception) {
-//            return ResponseEntity.badRequest().body("Could not upload the file:" + file.originalFilename)
-//        }
-//    }
+    @GetMapping("/check_plag_lab_by_teacher/{email}/{subject}/{labNumber}")
+    fun checkPlagLabByTeacher(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        model: Model
+    ): String {
+        userServiceClient.checkPlagByTeacher(teacherEmail, subject, labNumber)
+
+        return "redirect:/get_lab_by_teacher/${teacherEmail}/${subject}/${labNumber}"
+    }
+
+    @GetMapping("/compile_lab_by_teacher/{email}/{subject}/{labNumber}")
+    fun compileLabByTeacher(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        model: Model
+    ): String {
+        userServiceClient.compileLabByTeacher(teacherEmail, subject, labNumber)
+
+        return "redirect:/get_lab_by_teacher/${teacherEmail}/${subject}/${labNumber}"
+    }
+
+    @GetMapping("/test_lab_by_teacher/{email}/{subject}/{labNumber}")
+    fun testLabByTeacher(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        model: Model
+    ): String {
+        userServiceClient.testLabByTeacher(teacherEmail, subject, labNumber)
+
+        return "redirect:/get_lab_by_teacher/${teacherEmail}/${subject}/${labNumber}"
+    }
 }

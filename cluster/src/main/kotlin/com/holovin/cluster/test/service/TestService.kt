@@ -1,7 +1,7 @@
 package com.holovin.cluster.test.service
 
-import com.holovin.cluster.test.service.domain.CompileData
-import com.holovin.cluster.test.service.domain.CompileDataRepository
+import com.holovin.cluster.test.service.domain.CompileAndTestData
+import com.holovin.cluster.test.service.domain.CompileAndTestDataRepository
 import org.apache.maven.plugin.surefire.log.api.NullConsoleLogger
 import org.apache.maven.plugins.surefire.report.SurefireReportParser
 import org.springframework.stereotype.Component
@@ -14,48 +14,102 @@ import java.util.Locale
 
 @Component
 class TestService(
-    val compileDataRepository: CompileDataRepository
+    val compileDataRepository: CompileAndTestDataRepository
 ) {
 
     fun compileSrc(labFolder: String, labName: String) {
         val labPath = filesDb + "\\" + labFolder + "\\" + labName
 
-        val source = "cd $labPath"
-        val commandCompilationSrc = "mvn compile"
-        val cmd = "cmd /c start cmd.exe /K \"$source & $commandCompilationSrc & EXIT\""
+        Thread {
+            val source = "cd $labPath"
+            val commandCompilationSrc = "mvn compile"
+            val cmd = "cmd /c start cmd.exe /K \"$source & $commandCompilationSrc & EXIT\""
 
-        Runtime.getRuntime().exec(cmd).waitFor()
-        Thread.sleep(10000)
+            Runtime.getRuntime().exec(cmd).waitFor()
+            Thread.sleep(10000)
 
-        checkIfCompileSuccess(labFolder, labName, labPath)
+            checkIfCompileSuccess(labFolder, labName, labPath)
+        }.start()
+
     }
 
-    fun getResultCompile(labFolder: String, labName: String): Boolean {
+    fun getResultCompile(labFolder: String, labName: String): String {
         val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
         return when {
             compileDataOptional.isPresent -> compileDataOptional.get().compileResult
-            else -> false
+            else -> "Internal error"
+        }
+    }
+
+    fun getResultTest(labFolder: String, labName: String): String {
+        val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
+        return when {
+            compileDataOptional.isPresent -> compileDataOptional.get().testResult
+            else -> "Internal error"
         }
     }
 
     fun runTests(labFolder: String, labName: String) {
         val labPath = filesDb + "\\" + labFolder + "\\" + labName
 
-        val source = "cd $labPath"
-        val commandCompilationTest = "mvn test"
-        val cmd = "cmd /c start cmd.exe /K \"$source & $commandCompilationTest & EXIT\""
-        Runtime.getRuntime().exec(cmd).waitFor()
-        Thread.sleep(15000)
+        Thread {
+            val source = "cd $labPath"
+            val commandCompilationTest = "mvn test"
+            val cmd = "cmd /c start cmd.exe /K \"$source & $commandCompilationTest & EXIT\""
+            Runtime.getRuntime().exec(cmd).waitFor()
+            Thread.sleep(15000)
 
-        val surefireReportsDirectory = File("$labPath\\target\\surefire-reports")
+            val surefireReportsDirectory = File("$labPath\\target\\surefire-reports")
 
-        val parser = SurefireReportParser(listOf(surefireReportsDirectory), Locale.ENGLISH, NullConsoleLogger())
-        val testSuites = parser.parseXMLReportFiles()
-        for (reportTestSuite in testSuites) {
-            if (reportTestSuite.numberOfErrors + reportTestSuite.numberOfFailures > 0) {
-                throw IllegalArgumentException("Error test")
+            val parser = SurefireReportParser(listOf(surefireReportsDirectory), Locale.ENGLISH, NullConsoleLogger())
+            val testSuites = parser.parseXMLReportFiles()
+
+            var errorsCount = 0
+            for (reportTestSuite in testSuites) {
+                if (reportTestSuite.numberOfErrors + reportTestSuite.numberOfFailures > 0) {
+                    errorsCount += (reportTestSuite.numberOfErrors + reportTestSuite.numberOfFailures)
+                }
             }
-        }
+
+            when (errorsCount) {
+                0 -> {
+                    val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
+
+                    if (compileDataOptional.isPresent) {
+                        val compileData = compileDataOptional.get()
+                        compileData.testResult = "OK"
+                        compileDataRepository.save(compileData)
+                    } else {
+                        compileDataRepository.save(
+                            CompileAndTestData(
+                                labFolder = labFolder,
+                                labName = labName,
+                                compileResult = "Not tested",
+                                testResult = "Ok"
+                            )
+                        )
+                    }
+                }
+                else -> {
+                    val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
+
+                    if (compileDataOptional.isPresent) {
+                        val compileData = compileDataOptional.get()
+                        compileData.testResult = "Code have problems - $errorsCount count"
+                        compileDataRepository.save(compileData)
+                    } else {
+                        compileDataRepository.save(
+                            CompileAndTestData(
+                                labFolder = labFolder,
+                                labName = labName,
+                                compileResult = "Not tested",
+                                testResult = "Code have problems - $errorsCount count"
+                            )
+                        )
+                    }
+                }
+            }
+        }.start()
     }
 
     private fun checkIfCompileSuccess(labFolder: String, labName: String, labPath: String) {
@@ -72,28 +126,41 @@ class TestService(
             val lineNumberInputReader = LineNumberReader(BufferedReader(FileReader(inputFiles)))
             if (lineNumberInputReader.readLine() != null) lineNumberInput = lineNumberInputReader.lineNumber
 
-            val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
-
-            if (compileDataOptional.isPresent){
-                val compileData = compileDataOptional.get()
-                compileData.compileResult = true
-                compileDataRepository.save(compileData)
-            } else {
-                compileDataRepository.save(CompileData(labFolder = labFolder, labName = labName, compileResult = true))
-            }
-
             require(lineNumberCreated == lineNumberInput) { "Compile error" }
 
+            val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
+
+            if (compileDataOptional.isPresent) {
+                val compileData = compileDataOptional.get()
+                compileData.compileResult = "OK"
+                compileDataRepository.save(compileData)
+            } else {
+                compileDataRepository.save(
+                    CompileAndTestData(
+                        labFolder = labFolder,
+                        labName = labName,
+                        compileResult = "OK",
+                        testResult = "Not tested"
+                    )
+                )
+            }
 
         } catch (e: Exception) {
             val compileDataOptional = compileDataRepository.findByLabFolderAndLabName(labFolder, labName)
 
-            if (compileDataOptional.isPresent){
+            if (compileDataOptional.isPresent) {
                 val compileData = compileDataOptional.get()
-                compileData.compileResult = false
+                compileData.compileResult = "Failed"
                 compileDataRepository.save(compileData)
             } else {
-                compileDataRepository.save(CompileData(labFolder = labFolder, labName = labName, compileResult = false))
+                compileDataRepository.save(
+                    CompileAndTestData(
+                        labFolder = labFolder,
+                        labName = labName,
+                        compileResult = "Failed",
+                        testResult = "Not tested"
+                    )
+                )
             }
 
         }

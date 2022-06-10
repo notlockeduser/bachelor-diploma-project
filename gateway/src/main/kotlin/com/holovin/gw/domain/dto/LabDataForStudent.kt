@@ -5,5 +5,7 @@ data class LabDataForStudent(
     val subject: String?,
     val labNumber: String?,
     val description: String?,
-    val compileResult: Boolean?
+    val plagiarismPercent: String?,
+    val compileResult: String?,
+    val testResult: String?
 )

@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "lab_data")
 data class LabData(
-    @Id val id: ObjectId = ObjectId.get(),
+    @Id val _id: ObjectId = ObjectId.get(),
     val teacherEmail: String,
     val subject: String,
     val labNumber: String,

@@ -19,12 +19,17 @@
     <h1>Lab statistic</h1>
 
     <hr>
-    <p th:text="${lab}"></p>
+    <p th:text="${lab.getTeacherEmail()}"></p>
+    <p th:text="${lab.getLabNumber()}"></p>
+    <p th:text="${lab.getSubject()}"></p>
+    <p th:text="${lab.getDescription()}"></p>
     <hr>
 
     <hr>
-    <h2>Add access by email student</h2>
-    <form th:object="${updateAccessByEmail}" th:action="@{/update_access_by_email/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}" th:method="get">
+    <p>Add access by email student</p>
+    <form th:object="${updateAccessByEmail}"
+          th:action="@{/update_access_by_email/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}"
+          th:method="get">
         <div>
             <label for="studentEmail">Given studentEmail</label>
             <input id="studentEmail" type="text" th:field="*{email}">
@@ -34,8 +39,10 @@
     <hr>
 
     <hr>
-    <h2>Add access by group</h2>
-    <form th:object="${updateAccessByGroup}" th:action="@{/update_access_by_group/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}" th:method="get">
+    <p>Add access by group</p>
+    <form th:object="${updateAccessByGroup}"
+          th:action="@{/update_access_by_group/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}"
+          th:method="get">
         <div>
             <label for="group">Given group</label>
             <input id="group" type="text" th:field="*{group}">
@@ -43,6 +50,32 @@
         <button type="submit">Add access by group</button>
     </form>
     <hr>
+
+    <h3>Students labs</h3>
+    <hr>
+    <tr th:each="labStudent: *{lab.getLabsData()}">
+        <p th:text="${labStudent}"></p>
+        <hr>
+    </tr>
+
+    <hr>
+    <hr>
+    <a th:href="@{/check_plag_lab_by_teacher/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
+        Check plagiarism
+    </a>
+
+    <hr>
+
+    <a th:href="@{/compile_lab_by_teacher/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
+        Start compile
+    </a>
+
+    <hr>
+
+    <a th:href="@{/test_lab_by_teacher/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
+        Start test
+    </a>
+
 
 </div>
 </body>

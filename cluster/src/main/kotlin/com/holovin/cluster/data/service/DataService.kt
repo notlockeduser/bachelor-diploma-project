@@ -2,6 +2,7 @@ package com.holovin.cluster.data.service
 
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.lang3.RandomStringUtils
+import org.kohsuke.github.GitHubBuilder
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
@@ -29,6 +30,22 @@ class DataService {
         val archiveZip = ZipFile(toUpload + "\\" + "zip_${RandomStringUtils.randomAlphabetic(10)}.zip")
         archiveZip.addFolder(File("$rootFolder\\$labFolder\\template"));
         return archiveZip
+    }
+
+    fun getFromGitHub(labFolder: String, labName: String, ownerReposUrl: String) {
+        val gitHub = GitHubBuilder()
+            .withOAuthToken("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")
+            .build()
+
+        val repository = gitHub.getRepository(ownerReposUrl)
+
+        val cd = "cd ${rootFolder + "\\" + labFolder + "\\"}"
+        val command = "git clone ${repository.httpTransportUrl}"
+        val ren = "ren  ${repository.name} $labName"
+        val cmd = "cmd /c start cmd.exe /K \"$cd & $command & $ren & EXIT \""
+
+        Runtime.getRuntime().exec(cmd).waitFor()
+        Thread.sleep(3000)
     }
 
     companion object {

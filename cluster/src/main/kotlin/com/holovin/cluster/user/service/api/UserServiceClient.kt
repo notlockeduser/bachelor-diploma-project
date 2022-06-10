@@ -2,6 +2,7 @@ package com.holovin.cluster.user.service.api
 
 import com.holovin.cluster.user.service.api.dto.LabDataForStudent
 import com.holovin.cluster.user.service.api.dto.LabDescription
+import com.holovin.cluster.user.service.api.dto.LabsDataForTeacher
 import com.holovin.cluster.user.service.domain.mongo.LabData
 import com.holovin.cluster.user.service.domain.mongo.StudentData
 import com.holovin.cluster.user.service.domain.mongo.TeacherData
@@ -47,7 +48,7 @@ interface UserServiceClient {
         @RequestParam teacherEmail: String,
         @RequestParam subject: String,
         @RequestParam labNumber: String
-    ): LabData
+    ): LabsDataForTeacher
 
     @GetMapping("/findLabByStudent")
     fun findLabByStudent(
@@ -71,6 +72,15 @@ interface UserServiceClient {
         @RequestParam labNumber: String
     )
 
+    @PostMapping("/uploadLabByGithub")
+    fun uploadLabByGithub(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String,
+        @RequestParam ownerRepos: String
+    )
+
     @PostMapping("/updateStudentAccessByGroup")
     fun updateStudentAccessByGroup(
         @RequestParam teacherEmail: String,
@@ -79,8 +89,24 @@ interface UserServiceClient {
         @RequestParam labNumber: String
     )
 
+    @GetMapping("/checkPlagByStudent")
+    fun checkPlagByStudent(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
+
     @GetMapping("/compileLabByStudent")
     fun compileLabByStudent(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
+
+    @GetMapping("/testLabByStudent")
+    fun testLabByStudent(
         @RequestParam teacherEmail: String,
         @RequestParam studentEmail: String,
         @RequestParam subject: String,
@@ -94,5 +120,26 @@ interface UserServiceClient {
         @RequestParam subject: String,
         @RequestParam labNumber: String,
         @RequestPart multipartFile: MultipartFile
+    )
+
+    @GetMapping("/checkPlagByTeacher")
+    fun checkPlagByTeacher(
+        @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
+
+    @GetMapping("/compileLabByTeacher")
+    fun compileLabByTeacher(
+        @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
+    )
+
+    @GetMapping("/testLabByTeacher")
+    fun testLabByTeacher(
+        @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String
     )
 }

@@ -9,37 +9,60 @@ import org.springframework.stereotype.Component
 import java.io.File
 
 @Component
-class PlagiarismService {
+class PlagiarismService(val repository: PlagResultDataRepository) {
 
     fun checkLabByStudent(labFolder: String, studentLabName: String): Float {
         val options = createJPlagOptions(labFolder)
         val result = JPlag(options).run()
 
-//        webOutputResult(options, result)
+        webOutputResult(options, result, labFolder, studentLabName)
 
-        return result.comparisons
+        val maxOf = result.comparisons
             .filter { it.firstSubmission.name == studentLabName || it.secondSubmission.name == studentLabName }
             .maxOf { it.similarity() }
+
+        val dataOptional = repository.findByLabFolderAndLabName(labFolder, studentLabName)
+
+        if (dataOptional.isPresent) {
+            val compileData = dataOptional.get()
+            compileData.result = maxOf.toString()
+            repository.save(compileData)
+        } else {
+            repository.save(
+                PlagResultData(
+                    labFolder = labFolder,
+                    labName = studentLabName,
+                    result = maxOf.toString()
+                )
+            )
+        }
+
+        return maxOf
     }
 
-    fun checkLabByTeacher(labFolder: String): List<Pair<String, Float>> {
-
-        val options = createJPlagOptions(labFolder)
-        val result = JPlag(options).run()
-
-        val actualLabFolder = File(filesDb + "\\" + labFolder)
-        val listNameLabs = actualLabFolder.listFiles()!!
-
-        return listNameLabs.map { it.name }
-            .map { studentLabName ->
-                studentLabName to result.comparisons
-                    .filter { it.firstSubmission.name == studentLabName || it.secondSubmission.name == studentLabName }
-                    .maxOf { it.similarity() }
-            }
+    fun getResultPlag(labFolder: String, labName: String): String {
+        val resultDataOptional = repository.findByLabFolderAndLabName(labFolder, labName)
+        return when {
+            resultDataOptional.isPresent -> resultDataOptional.get().result
+            else -> "Internal error"
+        }
     }
 
-    private fun webOutputResult(options: JPlagOptions, result: JPlagResult?) {
-        val outputDir = File(webOutput)
+    fun getResultZipWeb(labFolder: String, labName: String): String {
+        val resultDataOptional = repository.findByLabFolderAndLabName(labFolder, labName)
+        return when {
+            resultDataOptional.isPresent -> resultDataOptional.get().result
+            else -> "Internal error"
+        }
+    }
+
+    private fun webOutputResult(
+        options: JPlagOptions,
+        result: JPlagResult?,
+        labFolder: String,
+        studentLabName: String
+    ) {
+        val outputDir = File(webOutput + "\\" + labFolder + "\\" + studentLabName)
         val report = Report(outputDir, options)
         report.writeResult(result)
     }

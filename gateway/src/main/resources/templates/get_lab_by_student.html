@@ -23,34 +23,45 @@
 
     <hr>
 
-<!--    <p th:text="Result compile ${lab.getCompileResult()}"></p>-->
+    <!--    <p th:text="Result compile ${lab.getCompileResult()}"></p>-->
+
+    <a th:href="@{/check_plag_lab_by_student/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
+        Check plagiarism
+    </a>
+
+    <hr>
+
     <a th:href="@{/compile_lab_by_student/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
         Start compile
     </a>
 
     <hr>
 
-    <form method="post" th:action="@{/upload_lab_by_student/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}" enctype="multipart/form-data">
+    <a th:href="@{/test_lab_by_student/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
+        Start test
+    </a>
+
+    <hr>
+
+    <form method="post"
+          th:action="@{/upload_lab_by_student/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}"
+          enctype="multipart/form-data">
         <div class="form-group">
             <input type="file" name="file" class="form-control-file">
         </div>
         <button type="submit" class="btn btn-primary">Upload Zip File</button>
     </form>
-    <!--    <div th:object="${lab}">-->
-
-    <!--        <p th:text="*{name}"></p>-->
-    <!--        <p th:text="*{surname}"></p>-->
-    <!--        <p th:text="*{email}"></p>-->
-    <!--        <tr th:each="labFolder: *{createdLabs}">-->
-    <!--            <a th:text="${labFolder.createNameFolder()}"-->
-    <!--               th:href="@{/get_lab_by_teacher/{email}/{subject}/{labNumber}(email = ${labFolder.getIdTeacher()},subject = ${labFolder.getSubject()},labNumber = ${labFolder.getLabNumber()})}">-->
-    <!--            </a>-->
-    <!--        </tr>-->
-
-    <!--        <hr>-->
-    <!--        <a th:href="@{create_lab}">Add lab</a>-->
-
-    <!--    </div>-->
+    <hr>
+    <p>Add lab from github - add text as "owner/reposName"</p>
+    <form th:object="${gitHubUrl}"
+          th:action="@{/upload_lab_by_github/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}"
+          th:method="get">
+        <div>
+            <label for="studentEmail">Given studentEmail</label>
+            <input id="studentEmail" type="text" th:field="*{ownerRepos}">
+        </div>
+        <button type="submit">Add access by email student</button>
+    </form>
 </div>
 </body>
 </html>

@@ -39,6 +39,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf:2.7.0")
 
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:3.1.3")
+    implementation("org.kohsuke:github-api:1.306")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
