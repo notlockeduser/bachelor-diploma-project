@@ -2,7 +2,7 @@ spring:
   data:
     mongodb:
       uri: mongodb://local-mongo-usr:local-mongo-pwd@localhost:27017/data-svc?authSource=admin
-      database: user-svc
+      database: data-svc
   servlet:
     multipart:
       max-request-size: 50MB
