@@ -20,3 +20,6 @@ data class GitHubUrl(
     val ownerRepos: String? = null
 )
 
+data class StudentEmail(
+    val email: String? = null
+)

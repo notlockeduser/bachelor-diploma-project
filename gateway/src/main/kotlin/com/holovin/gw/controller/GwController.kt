@@ -5,6 +5,7 @@ import com.holovin.gw.domain.dto.DocumentRequest
 import com.holovin.gw.domain.dto.GitHubUrl
 import com.holovin.gw.domain.dto.LabDescription
 import com.holovin.gw.domain.dto.StudentData
+import com.holovin.gw.domain.dto.StudentEmail
 import com.holovin.gw.domain.dto.TeacherData
 import com.holovin.gw.domain.dto.UpdateAccessByEmail
 import com.holovin.gw.domain.dto.UpdateAccessByGroup
@@ -109,6 +110,7 @@ class GwController(
         model.addAttribute("lab", labInfo)
         model.addAttribute("updateAccessByEmail", UpdateAccessByEmail())
         model.addAttribute("updateAccessByGroup", UpdateAccessByGroup())
+        model.addAttribute("studentEmail", StudentEmail())
         return "get_lab_by_teacher"
     }
 
@@ -183,6 +185,22 @@ class GwController(
     ): RedirectView {
         userServiceClient.addLabByStudent(teacherEmail, principal.name, subject, labNumber, file)
         return RedirectView("/get_lab_by_student/${teacherEmail}/${subject}/${labNumber}")
+    }
+
+    @ResponseBody
+    @PostMapping(
+        "/upload_template/{email}/{subject}/{labNumber}",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
+    fun uploadTemplate(
+        principal: Principal,
+        @RequestParam file: MultipartFile,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+    ): RedirectView {
+        userServiceClient.addTemplateByTeacher(teacherEmail, subject, labNumber, file)
+        return RedirectView("/get_lab_by_teacher/${teacherEmail}/${subject}/${labNumber}")
     }
 
     @GetMapping("/upload_lab_by_github/{email}/{subject}/{labNumber}")
@@ -294,6 +312,27 @@ class GwController(
         response.contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE
         val headerKey = HttpHeaders.CONTENT_DISPOSITION
         val headerValue = "attachment; filename=\"zipFile.zip\""
+        response.setHeader(headerKey, headerValue)
+        val outputStream = response.outputStream
+        outputStream.write(arrayBytes)
+        outputStream.close()
+    }
+
+    @PostMapping("/download_report/{email}/{subject}/{labNumber}/{studentEmail}")
+    fun downloadReport(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        @PathVariable("studentEmail") studentEmail: String,
+        response: HttpServletResponse,
+        model: Model
+    ) {
+        val arrayBytes = userServiceClient.downloadPlagReport(teacherEmail, studentEmail, subject, labNumber)
+
+        response.contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE
+        val headerKey = HttpHeaders.CONTENT_DISPOSITION
+        val headerValue = "attachment; filename=\"report_${studentEmail}.zip\""
         response.setHeader(headerKey, headerValue)
         val outputStream = response.outputStream
         outputStream.write(arrayBytes)

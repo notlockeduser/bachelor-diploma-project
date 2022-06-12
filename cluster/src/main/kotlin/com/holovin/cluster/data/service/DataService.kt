@@ -11,7 +11,9 @@ import java.io.File
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class DataService {
+class DataService(
+    private val gitHubTokenRepository: GitHubTokenRepository
+) {
 
     fun saveLab(archiveLab: MultipartFile, labFolder: String, labName: String) {
         // save file as .zip
@@ -31,14 +33,16 @@ class DataService {
 
     fun getTemplate(labFolder: String): ByteArray {
         val archiveZip = ZipFile(toUpload + "\\" + "zip_${RandomStringUtils.randomAlphabetic(10)}.zip")
-        archiveZip.addFolder(File("$rootFolder\\$labFolder\\template"))
+        archiveZip.addFolder(File("$rootFolder\\${labFolder + "_template"}\\template"))
 
         return archiveZip.file.readBytes()
     }
 
     fun getFromGitHub(labFolder: String, labName: String, ownerReposUrl: String) {
+        val token = gitHubTokenRepository.findAll().first().token
+
         val gitHub = GitHubBuilder()
-            .withOAuthToken("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")
+            .withOAuthToken(token)
             .build()
 
         val repository = gitHub.getRepository(ownerReposUrl)

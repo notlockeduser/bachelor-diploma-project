@@ -55,6 +55,25 @@ class UserService(
         dataService.saveLab(multipartFile, labData.createNameLabFolder(), labData.createNameLab(studentData))
     }
 
+    fun addTemplate(
+        teacherEmail: String,
+        subject: String,
+        labNumber: String,
+        multipartFile: MultipartFile
+    ) {
+
+        val teacherData = getTeacherFromDbByEmail(teacherEmail)
+
+        val labData = labDataRepository.findByTeacherEmailAndSubjectAndLabNumber(
+            teacherEmail,
+            subject,
+            labNumber
+        ).get()
+
+        // data service
+        dataService.saveLab(multipartFile, labData.createNameLabFolder() + "_template", "template")
+    }
+
     fun checkPlagByStudent(teacherEmail: String, studentEmail: String, subject: String, labNumber: String) {
 
         val studentFromDbByEmail = getStudentFromDbByEmail(studentEmail)
@@ -235,7 +254,13 @@ class UserService(
         labDataRepository.save(labData)
     }
 
-    fun uploadLabByGithub(teacherEmail: String, studentEmail: String, subject: String, labNumber: String, ownerRepos:String) {
+    fun uploadLabByGithub(
+        teacherEmail: String,
+        studentEmail: String,
+        subject: String,
+        labNumber: String,
+        ownerRepos: String
+    ) {
 
         val teacherData = getTeacherFromDbByEmail(teacherEmail)
         val studentData = getStudentFromDbByEmail(studentEmail)
@@ -306,7 +331,27 @@ class UserService(
             labNumber
         ).get()
 
-       return dataService.getTemplate(labData.createNameLabFolder())
+        return dataService.getTemplate(labData.createNameLabFolder())
+    }
+
+    fun downloadPlagReport(
+        teacherEmail: String,
+        studentEmail: String,
+        subject: String,
+        labNumber: String
+    ): ByteArray {
+        val studentFromDbByEmail = getStudentFromDbByEmail(studentEmail)
+        val labData = labDataRepository.findByAcceptedStudentEmailsContainsAndTeacherEmailAndSubjectAndLabNumber(
+            studentEmail,
+            teacherEmail,
+            subject,
+            labNumber
+        ).get()
+
+        return plagiarismService.getResultZipWeb(
+            labData.createNameLabFolder(),
+            labData.createNameLab(studentFromDbByEmail)
+        )
     }
 
     // utils

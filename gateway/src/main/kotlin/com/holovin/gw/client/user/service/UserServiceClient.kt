@@ -123,6 +123,14 @@ interface UserServiceClient {
         @RequestPart multipartFile: MultipartFile
     )
 
+    @PostMapping("/addTemplateByTeacher", consumes = ["multipart/form-data"])
+    fun addTemplateByTeacher(
+        @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String,
+        @RequestPart multipartFile: MultipartFile
+    )
+
     @GetMapping("/checkPlagByTeacher")
     fun checkPlagByTeacher(
         @RequestParam teacherEmail: String,
@@ -147,6 +155,14 @@ interface UserServiceClient {
     @PostMapping("/downloadTemplate")
     fun downloadTemplate(
         @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String,
+    ): ByteArray
+
+    @PostMapping("/downloadPlagReport")
+    fun downloadPlagReport(
+        @RequestParam teacherEmail: String,
+        @RequestParam studentEmail: String,
         @RequestParam subject: String,
         @RequestParam labNumber: String,
     ): ByteArray

@@ -55,6 +55,13 @@
     <hr>
     <tr th:each="labStudent: *{lab.getLabsData()}">
         <p th:text="${labStudent}"></p>
+        <h3 text="Download report"></h3>
+        <form class="document" method="post"
+              th:action="@{/download_report/{email}/{subject}/{labNumber}/{studentEmail}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()},studentEmail=${labStudent.getStudentData().getEmail()})}"
+              th:object="${studentEmail}">
+
+            <button type="submit" name="submit" value="value" class="link-button">report</button>
+        </form>
         <hr>
     </tr>
 
@@ -75,6 +82,19 @@
     <a th:href="@{/test_lab_by_teacher/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}">
         Start test
     </a>
+
+    <hr>
+    <h3>Upload template </h3>
+    <form method="post"
+          th:action="@{/upload_template/{email}/{subject}/{labNumber}(email = ${lab.getTeacherEmail()},subject = ${lab.getSubject()},labNumber = ${lab.getLabNumber()})}"
+          enctype="multipart/form-data">
+        <div class="form-group">
+            <input type="file" name="file" class="form-control-file">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload Zip File</button>
+    </form>
+
+    <hr>
 
 
 </div>

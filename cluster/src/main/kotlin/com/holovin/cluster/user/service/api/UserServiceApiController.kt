@@ -9,6 +9,7 @@ import com.holovin.cluster.user.service.domain.mongo.StudentData
 import com.holovin.cluster.user.service.domain.mongo.TeacherData
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import javax.servlet.http.HttpServletResponse
@@ -118,6 +119,15 @@ class UserServiceApiController(
         userService.addLab(teacherEmail, studentEmail, subject, labNumber, multipartFile)
     }
 
+    override fun addTemplateByTeacher(
+        teacherEmail: String,
+        subject: String,
+        labNumber: String,
+        multipartFile: MultipartFile
+    ) {
+        userService.addTemplate(teacherEmail, subject, labNumber, multipartFile)
+    }
+
     override fun checkPlagByTeacher(teacherEmail: String, subject: String, labNumber: String) {
         userService.checkPlagByTeacher(teacherEmail, subject, labNumber)
     }
@@ -135,6 +145,15 @@ class UserServiceApiController(
         subject: String,
         labNumber: String
     ): ByteArray {
-       return userService.downloadTemplate(teacherEmail, subject, labNumber)
+        return userService.downloadTemplate(teacherEmail, subject, labNumber)
+    }
+
+    override fun downloadPlagReport(
+        teacherEmail: String,
+        studentEmail: String,
+        subject: String,
+        labNumber: String
+    ): ByteArray {
+        return userService.downloadPlagReport(teacherEmail, studentEmail, subject, labNumber)
     }
 }

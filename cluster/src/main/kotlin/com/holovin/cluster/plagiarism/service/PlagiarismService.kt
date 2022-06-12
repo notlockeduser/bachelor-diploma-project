@@ -5,6 +5,8 @@ import de.jplag.JPlagResult
 import de.jplag.options.JPlagOptions
 import de.jplag.options.LanguageOption
 import de.jplag.reporting.Report
+import net.lingala.zip4j.ZipFile
+import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.stereotype.Component
 import java.io.File
 
@@ -48,12 +50,12 @@ class PlagiarismService(val repository: PlagResultDataRepository) {
         }
     }
 
-    fun getResultZipWeb(labFolder: String, labName: String): String {
-        val resultDataOptional = repository.findByLabFolderAndLabName(labFolder, labName)
-        return when {
-            resultDataOptional.isPresent -> resultDataOptional.get().result
-            else -> "Internal error"
-        }
+    fun getResultZipWeb(labFolder: String, labName: String): ByteArray {
+
+        val archiveZip = ZipFile(webOutputZip + "\\" + "zip_${RandomStringUtils.randomAlphabetic(10)}.zip")
+        archiveZip.addFolder(File("$webOutput\\$labFolder\\$labName"))
+
+        return archiveZip.file.readBytes()
     }
 
     private fun webOutputResult(
@@ -72,7 +74,7 @@ class PlagiarismService(val repository: PlagResultDataRepository) {
             filesDb + "\\" + labName,
             LanguageOption.JAVA
         )
-        options.exclusionFileName = "template"
+        options.exclusionFileName = "C:\\Users\\Bogdan\\Desktop\\Diploma\\cluster\\xFiles\\template.txt"
         options.minimumTokenMatch = 1
         return options
     }
@@ -80,7 +82,7 @@ class PlagiarismService(val repository: PlagResultDataRepository) {
     companion object {
         const val filesDb = "xFiles\\database_lab_files"
         const val webOutput = "xFiles\\web_output"
-
+        const val webOutputZip = "xFiles\\web_output_zip"
         // options.comparisonMode = ComparisonMode.NORMAL
         // options.baseCodeSubmissionName = "template"
     }
