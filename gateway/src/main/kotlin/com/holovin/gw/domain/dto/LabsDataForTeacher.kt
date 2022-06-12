@@ -14,3 +14,10 @@ data class LabDataForTeacher(
     val compileResult: String,
     val testResult: String
 )
+
+data class DocumentRequest(
+    val teacherEmail: String? = null,
+    val studentEmail: String? = null,
+    val subject: String? = null,
+    val labNumber: String? = null,
+)

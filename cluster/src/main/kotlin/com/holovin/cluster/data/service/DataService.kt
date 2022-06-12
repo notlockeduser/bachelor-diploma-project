@@ -3,9 +3,12 @@ package com.holovin.cluster.data.service
 import net.lingala.zip4j.ZipFile
 import org.apache.commons.lang3.RandomStringUtils
 import org.kohsuke.github.GitHubBuilder
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
+import javax.servlet.http.HttpServletResponse
 
 @Component
 class DataService {
@@ -26,10 +29,11 @@ class DataService {
         archiveLab.extractAll(rootFolder + "\\" + labFolder)
     }
 
-    fun getTemplate(labFolder: String): ZipFile {
+    fun getTemplate(labFolder: String): ByteArray {
         val archiveZip = ZipFile(toUpload + "\\" + "zip_${RandomStringUtils.randomAlphabetic(10)}.zip")
-        archiveZip.addFolder(File("$rootFolder\\$labFolder\\template"));
-        return archiveZip
+        archiveZip.addFolder(File("$rootFolder\\$labFolder\\template"))
+
+        return archiveZip.file.readBytes()
     }
 
     fun getFromGitHub(labFolder: String, labName: String, ownerReposUrl: String) {

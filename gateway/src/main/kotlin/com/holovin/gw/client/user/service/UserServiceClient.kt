@@ -143,4 +143,11 @@ interface UserServiceClient {
         @RequestParam subject: String,
         @RequestParam labNumber: String
     )
+
+    @PostMapping("/downloadTemplate")
+    fun downloadTemplate(
+        @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String,
+    ): ByteArray
 }

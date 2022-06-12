@@ -1,12 +1,14 @@
 package com.holovin.gw.controller
 
 import com.holovin.gw.client.user.service.UserServiceClient
+import com.holovin.gw.domain.dto.DocumentRequest
 import com.holovin.gw.domain.dto.GitHubUrl
 import com.holovin.gw.domain.dto.LabDescription
 import com.holovin.gw.domain.dto.StudentData
 import com.holovin.gw.domain.dto.TeacherData
 import com.holovin.gw.domain.dto.UpdateAccessByEmail
 import com.holovin.gw.domain.dto.UpdateAccessByGroup
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.view.RedirectView
 import java.security.Principal
+import javax.servlet.http.HttpServletResponse
 
 @Controller
 @RequestMapping
@@ -122,6 +125,7 @@ class GwController(
             userServiceClient.findLabByStudent(principal.name, teacherEmail, subject, labNumber)
         )
         model.addAttribute("gitHubUrl", GitHubUrl())
+        model.addAttribute("documentRequest", DocumentRequest())
 
         return "get_lab_by_student"
     }
@@ -274,5 +278,25 @@ class GwController(
         userServiceClient.testLabByTeacher(teacherEmail, subject, labNumber)
 
         return "redirect:/get_lab_by_teacher/${teacherEmail}/${subject}/${labNumber}"
+    }
+
+    @PostMapping("/download_template/{email}/{subject}/{labNumber}")
+    fun downloadTemplate(
+        principal: Principal,
+        @PathVariable("email") teacherEmail: String,
+        @PathVariable("subject") subject: String,
+        @PathVariable("labNumber") labNumber: String,
+        response: HttpServletResponse,
+        model: Model
+    ) {
+        val arrayBytes = userServiceClient.downloadTemplate(teacherEmail, subject, labNumber)
+
+        response.contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE
+        val headerKey = HttpHeaders.CONTENT_DISPOSITION
+        val headerValue = "attachment; filename=\"zipFile.zip\""
+        response.setHeader(headerKey, headerValue)
+        val outputStream = response.outputStream
+        outputStream.write(arrayBytes)
+        outputStream.close()
     }
 }

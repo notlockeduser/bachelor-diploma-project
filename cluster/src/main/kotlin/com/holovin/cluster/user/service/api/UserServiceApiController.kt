@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 class UserServiceApiController(
@@ -128,5 +129,12 @@ class UserServiceApiController(
     override fun testLabByTeacher(teacherEmail: String, subject: String, labNumber: String) {
         userService.testLabByTeacher(teacherEmail, subject, labNumber)
     }
-}
 
+    override fun downloadTemplate(
+        teacherEmail: String,
+        subject: String,
+        labNumber: String
+    ): ByteArray {
+       return userService.downloadTemplate(teacherEmail, subject, labNumber)
+    }
+}

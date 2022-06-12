@@ -7,13 +7,17 @@ import com.holovin.cluster.user.service.domain.mongo.LabData
 import com.holovin.cluster.user.service.domain.mongo.StudentData
 import com.holovin.cluster.user.service.domain.mongo.TeacherData
 import org.springframework.http.ResponseEntity
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.multipart.MultipartFile
+import java.security.Principal
+import javax.servlet.http.HttpServletResponse
 
 interface UserServiceClient {
 
@@ -142,4 +146,11 @@ interface UserServiceClient {
         @RequestParam subject: String,
         @RequestParam labNumber: String
     )
+
+    @PostMapping("/downloadTemplate")
+    fun downloadTemplate(
+        @RequestParam teacherEmail: String,
+        @RequestParam subject: String,
+        @RequestParam labNumber: String,
+    ): ByteArray
 }

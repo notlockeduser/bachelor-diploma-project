@@ -15,6 +15,7 @@ import com.holovin.cluster.user.service.mongo.StudentDataRepository
 import com.holovin.cluster.user.service.mongo.TeacherDataRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
+import javax.servlet.http.HttpServletResponse
 
 @Component
 class UserService(
@@ -296,6 +297,16 @@ class UserService(
             val studentFromDbByEmail = getStudentFromDbByEmail(it)
             testService.runTests(labData.createNameLabFolder(), labData.createNameLab(studentFromDbByEmail))
         }
+    }
+
+    fun downloadTemplate(teacherEmail: String, subject: String, labNumber: String): ByteArray {
+        val labData = labDataRepository.findByTeacherEmailAndSubjectAndLabNumber(
+            teacherEmail,
+            subject,
+            labNumber
+        ).get()
+
+       return dataService.getTemplate(labData.createNameLabFolder())
     }
 
     // utils
