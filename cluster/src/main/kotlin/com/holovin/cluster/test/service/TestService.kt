@@ -167,6 +167,7 @@ class TestService(
     }
 
     companion object {
-        const val filesDb = "xFiles\\database_lab_files"
+        private const val absoluteDataService = "C:\\Users\\Bogdan\\Desktop\\Diploma\\dataService\\"
+        const val filesDb = absoluteDataService + "xFiles\\database_lab_files"
     }
 }

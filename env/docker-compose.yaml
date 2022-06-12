@@ -1,0 +1,27 @@
+services:
+  mongo:
+    container_name: mongodb
+    image: mongo:4.2.8
+    #    logging:
+    #      driver: fluentd
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: local-mongo-usr
+      MONGO_INITDB_ROOT_PASSWORD: local-mongo-pwd
+      MONGO_INITDB_DATABASE: user-svc
+    volumes:
+      - ./mongo:/docker-entrypoint-initdb.d
+      - ./mongo-data:/data/db
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: echo 'rs.initiate().ok || rs.status().ok' | mongo -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    #    depends_on:
+    #      fluentd:
+    #        condition: service_healthy
+    stop_grace_period: 30s
+    #    command: "--bind_ip_all --replSet rs0"
+    command: [ --auth ]

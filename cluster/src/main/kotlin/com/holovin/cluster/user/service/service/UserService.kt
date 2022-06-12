@@ -1,6 +1,6 @@
 package com.holovin.cluster.user.service.service
 
-import com.holovin.cluster.data.service.DataService
+import com.holovin.cluster.api.data.service.DataServiceClient
 import com.holovin.cluster.plagiarism.service.PlagiarismService
 import com.holovin.cluster.test.service.TestService
 import com.holovin.cluster.user.service.api.dto.LabDataForStudent
@@ -15,12 +15,11 @@ import com.holovin.cluster.user.service.mongo.StudentDataRepository
 import com.holovin.cluster.user.service.mongo.TeacherDataRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
-import javax.servlet.http.HttpServletResponse
 
 @Component
 class UserService(
     val plagiarismService: PlagiarismService,
-    val dataService: DataService,
+    val dataService: DataServiceClient,
     val testService: TestService,
     val labDataRepository: LabDataRepository,
     val studentDataRepository: StudentDataRepository,

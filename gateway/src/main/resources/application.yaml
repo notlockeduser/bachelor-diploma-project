@@ -7,8 +7,6 @@ spring:
 server:
   port : 8081
 
-#feign.compression.request.enabled=true
-#feign.compression.response.enabled=true
 feign.compression.request.enabled : true
 feign.compression.request.mime-types: text/xml,application/xml,application/json
 feign.compression.request.min-request-size : 2048

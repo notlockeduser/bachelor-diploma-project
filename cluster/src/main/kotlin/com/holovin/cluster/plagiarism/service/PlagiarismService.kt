@@ -74,16 +74,15 @@ class PlagiarismService(val repository: PlagResultDataRepository) {
             filesDb + "\\" + labName,
             LanguageOption.JAVA
         )
-        options.exclusionFileName = "C:\\Users\\Bogdan\\Desktop\\Diploma\\cluster\\xFiles\\template.txt"
         options.minimumTokenMatch = 1
         return options
     }
 
     companion object {
-        const val filesDb = "xFiles\\database_lab_files"
-        const val webOutput = "xFiles\\web_output"
-        const val webOutputZip = "xFiles\\web_output_zip"
-        // options.comparisonMode = ComparisonMode.NORMAL
-        // options.baseCodeSubmissionName = "template"
+        private const val absolute = "C:\\Users\\Bogdan\\Desktop\\Diploma\\cluster\\"
+        private const val absoluteDataService = "C:\\Users\\Bogdan\\Desktop\\Diploma\\dataService\\"
+        const val filesDb = absoluteDataService + "xFiles\\database_lab_files"
+        const val webOutput = absolute + "xFiles\\web_output"
+        const val webOutputZip = absolute + "xFiles\\web_output_zip"
     }
 }
