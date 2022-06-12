@@ -1,5 +1,6 @@
-package com.holovin.cluster.user.service.api
+package com.holovin.cluster.user.service.controller
 
+import com.holovin.cluster.user.service.api.UserServiceClient
 import com.holovin.cluster.user.service.api.dto.LabDataForStudent
 import com.holovin.cluster.user.service.api.dto.LabDescription
 import com.holovin.cluster.user.service.api.dto.LabsDataForTeacher
@@ -9,10 +10,8 @@ import com.holovin.cluster.user.service.domain.mongo.StudentData
 import com.holovin.cluster.user.service.domain.mongo.TeacherData
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import javax.servlet.http.HttpServletResponse
 
 @RestController
 class UserServiceApiController(

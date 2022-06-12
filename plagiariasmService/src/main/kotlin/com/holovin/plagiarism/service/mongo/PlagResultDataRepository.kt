@@ -1,4 +1,4 @@
-package com.holovin.cluster.plagiarism.service
+package com.holovin.plagiarism.service.mongo
 
 import org.springframework.data.mongodb.repository.MongoRepository
 import java.util.Optional

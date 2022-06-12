@@ -1,5 +1,6 @@
-package com.holovin.data.service.api
+package com.holovin.data.service.controller
 
+import com.holovin.data.service.api.DataServiceClient
 import com.holovin.data.service.service.Service
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile

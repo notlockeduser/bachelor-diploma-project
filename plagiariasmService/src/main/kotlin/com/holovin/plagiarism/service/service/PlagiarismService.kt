@@ -1,5 +1,7 @@
-package com.holovin.cluster.plagiarism.service
+package com.holovin.plagiarism.service.service
 
+import com.holovin.plagiarism.service.mongo.PlagResultData
+import com.holovin.plagiarism.service.mongo.PlagResultDataRepository
 import de.jplag.JPlag
 import de.jplag.JPlagResult
 import de.jplag.options.JPlagOptions
@@ -79,7 +81,7 @@ class PlagiarismService(val repository: PlagResultDataRepository) {
     }
 
     companion object {
-        private const val absolute = "C:\\Users\\Bogdan\\Desktop\\Diploma\\cluster\\"
+        private const val absolute = "C:\\Users\\Bogdan\\Desktop\\Diploma\\plagiariasmService\\"
         private const val absoluteDataService = "C:\\Users\\Bogdan\\Desktop\\Diploma\\dataService\\"
         const val filesDb = absoluteDataService + "xFiles\\database_lab_files"
         const val webOutput = absolute + "xFiles\\web_output"

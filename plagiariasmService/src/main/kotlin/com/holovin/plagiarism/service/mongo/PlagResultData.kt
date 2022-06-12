@@ -1,4 +1,4 @@
-package com.holovin.cluster.plagiarism.service
+package com.holovin.plagiarism.service.mongo
 
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
